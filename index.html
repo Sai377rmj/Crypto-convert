@@ -1,97 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Crypto Converter + Chart</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Converter with Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; }
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
 
-<style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    min-height: 100vh;
-    margin: 0;
-    padding: 15px;
-  }
+    .converter {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 25px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      text-align: center;
+    }
 
-  .converter {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    padding: 25px;
-    border-radius: 25px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
+    h2 {
+      color: #00ffcc;
+      margin-bottom: 15px;
+    }
 
-  h2 {
-    margin-bottom: 10px;
-    color: #00ffcc;
-  }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 1em;
+      outline: none;
+    }
 
-  input, select, button {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    font-size: 1em;
-    outline: none;
-  }
+    button {
+      background: linear-gradient(90deg, #00b894, #0984e3);
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
 
-  button {
-    background: linear-gradient(90deg, #00b894, #0984e3);
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-  }
+    button:hover {
+      background: linear-gradient(90deg, #00cec9, #74b9ff);
+      transform: scale(1.05);
+    }
 
-  button:hover {
-    background: linear-gradient(90deg, #00cec9, #74b9ff);
-    transform: scale(1.05);
-  }
+    .result {
+      margin-top: 12px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #81ecec;
+      word-wrap: break-word;
+    }
 
-  .result {
-    margin-top: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #81ecec;
-  }
+    canvas {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 400px;
+      height: 250px !important;
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 10px;
+    }
 
-  canvas {
-    width: 100% !important;
-    height: 250px !important;
-    margin-top: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    padding: 10px;
-  }
+    .ad-box {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      padding: 10px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      color: #ccc;
+      font-size: 0.9em;
+    }
 
-  .footer {
-    text-align: center;
-    font-size: 0.9em;
-    color: #bbb;
-  }
-
-  @media (max-width: 480px) {
-    h2 { font-size: 1.3em; }
-    .converter { padding: 20px; }
-    input, select, button { font-size: 0.95em; }
-  }
-</style>
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .converter { padding: 15px; }
+      h2 { font-size: 1.3em; }
+      input, select, button { font-size: 0.95em; }
+      canvas { height: 200px !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="converter">
@@ -102,15 +108,14 @@
     <select id="from">
       <option value="bitcoin">Bitcoin (BTC)</option>
       <option value="ethereum">Ethereum (ETH)</option>
-      <option value="tron">TRON (TRX)</option>
+      <option value="tron">Tron (TRX)</option>
       <option value="tether">Tether (USDT)</option>
       <option value="toncoin">Toncoin (TON)</option>
       <option value="dogecoin">Dogecoin (DOGE)</option>
       <option value="solana">Solana (SOL)</option>
       <option value="ripple">Ripple (XRP)</option>
+      <option value="litecoin">Litecoin (LTC)</option>
       <option value="cardano">Cardano (ADA)</option>
-      <option value="binancecoin">Binance (BNB)</option>
-      <option value="shiba-inu">Shiba Inu (SHIB)</option>
     </select>
 
     <select id="to">
@@ -118,109 +123,110 @@
       <option value="usd">USD</option>
       <option value="bitcoin">Bitcoin (BTC)</option>
       <option value="ethereum">Ethereum (ETH)</option>
-      <option value="tron">TRON (TRX)</option>
       <option value="toncoin">Toncoin (TON)</option>
-      <option value="dogecoin">Dogecoin (DOGE)</option>
+      <option value="tether">Tether (USDT)</option>
     </select>
 
     <button onclick="convert()">Convert</button>
     <div class="result" id="result">Result will appear here</div>
+
+    <canvas id="chart"></canvas>
   </div>
 
-  <canvas id="chart"></canvas>
+  <div class="ad-box">
+    🚀 <b>Ad Space:</b> Promote your crypto links or referral offers here!
+  </div>
 
-  <div class="footer">⚡ Powered by CoinGecko API</div>
+  <script>
+    let chart; // for updating the chart later
 
-<script>
-let chart;
+    async function convert() {
+      const amount = document.getElementById("amount").value;
+      const from = document.getElementById("from").value;
+      const to = document.getElementById("to").value;
+      const resultEl = document.getElementById("result");
 
-async function convert() {
-  const amount = parseFloat(document.getElementById("amount").value);
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
-  const resultEl = document.getElementById("result");
-
-  if (!amount) {
-    resultEl.innerHTML = "⚠️ Please enter an amount!";
-    return;
-  }
-
-  try {
-    // Get both prices in USD for conversion
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${from},${to}&vs_currencies=usd,inr`);
-    const data = await res.json();
-
-    if (!data[from]) {
-      resultEl.innerHTML = "❌ Coin not supported!";
-      return;
-    }
-
-    let rate;
-    if (to === "inr" || to === "usd") {
-      rate = data[from][to];
-    } else {
-      // crypto-to-crypto conversion via USD
-      rate = data[from].usd / data[to].usd;
-    }
-
-    const result = amount * rate;
-    resultEl.innerHTML = `${amount} ${from.toUpperCase()} = ${result.toFixed(6)} ${to.toUpperCase()}`;
-
-    // Show market chart for FROM coin (against USD)
-    showChart(from);
-  } catch (error) {
-    resultEl.innerHTML = "⚠️ Error fetching data!";
-  }
-}
-
-async function showChart(coinId) {
-  try {
-    const res = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7&interval=daily`
-    );
-    const data = await res.json();
-
-    const prices = data.prices.map(p => p[1]);
-    const labels = data.prices.map(p => new Date(p[0]).toLocaleDateString());
-
-    const ctx = document.getElementById("chart").getContext("2d");
-
-    if (chart) chart.destroy();
-
-    chart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: `${coinId.toUpperCase()} (Last 7 Days)`,
-          data: prices,
-          borderColor: "#00ffcc",
-          backgroundColor: "rgba(0,255,204,0.1)",
-          tension: 0.4,
-          fill: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            ticks: { color: "#ccc" }
-          },
-          y: {
-            ticks: { color: "#ccc" }
-          }
-        },
-        plugins: {
-          legend: {
-            labels: { color: "#fff" }
-          }
-        }
+      if (!amount) {
+        resultEl.innerHTML = "⚠️ Please enter an amount!";
+        return;
       }
-    });
-  } catch (e) {
-    console.log(e);
-  }
-}
-</script>
+
+      try {
+        // fetch conversion rate
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${from}&vs_currencies=${to}`);
+        const data = await res.json();
+
+        if (!data[from] || !data[from][to]) {
+          resultEl.innerHTML = "❌ Conversion not available!";
+          return;
+        }
+
+        const rate = data[from][to];
+        const result = amount * rate;
+        resultEl.innerHTML = `${amount} ${from.toUpperCase()} = ${result.toFixed(6)} ${to.toUpperCase()}`;
+
+        // Fetch chart data (7 days)
+        loadChart(from, to);
+
+      } catch (error) {
+        resultEl.innerHTML = "⚠️ Error fetching data!";
+        console.error(error);
+      }
+    }
+
+    async function loadChart(coin, currency) {
+      try {
+        const url = `https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=${currency}&days=7`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.prices) return;
+
+        const labels = data.prices.map(p => {
+          const d = new Date(p[0]);
+          return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+        });
+        const prices = data.prices.map(p => p[1]);
+
+        const ctx = document.getElementById("chart").getContext("2d");
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: `${coin.toUpperCase()} Price (Last 7 Days)`,
+              data: prices,
+              borderColor: "#00ffcc",
+              backgroundColor: "rgba(0,255,204,0.2)",
+              tension: 0.3,
+              fill: true,
+              borderWidth: 2,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#ccc" },
+                grid: { color: "rgba(255,255,255,0.1)" }
+              },
+              y: {
+                ticks: { color: "#ccc" },
+                grid: { color: "rgba(255,255,255,0.1)" }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Chart Error:", err);
+      }
+    }
+  </script>
 </body>
 </html>
