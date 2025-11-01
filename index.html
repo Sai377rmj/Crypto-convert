@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crypto Converter + Chart</title>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    padding: 15px;
+  }
+
+  .converter {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 25px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    margin-bottom: 10px;
+    color: #00ffcc;
+  }
+
+  input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1em;
+    outline: none;
+  }
+
+  button {
+    background: linear-gradient(90deg, #00b894, #0984e3);
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: linear-gradient(90deg, #00cec9, #74b9ff);
+    transform: scale(1.05);
+  }
+
+  .result {
+    margin-top: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #81ecec;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: 250px !important;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 10px;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 0.9em;
+    color: #bbb;
+  }
+
+  @media (max-width: 480px) {
+    h2 { font-size: 1.3em; }
+    .converter { padding: 20px; }
+    input, select, button { font-size: 0.95em; }
+  }
+</style>
+</head>
+<body>
+  <div class="converter">
+    <h2>💱 Crypto Converter</h2>
+
+    <input type="number" id="amount" placeholder="Enter amount" />
+
+    <select id="from">
+      <option value="bitcoin">Bitcoin (BTC)</option>
+      <option value="ethereum">Ethereum (ETH)</option>
+      <option value="tron">TRON (TRX)</option>
+      <option value="tether">Tether (USDT)</option>
+      <option value="toncoin">Toncoin (TON)</option>
+      <option value="dogecoin">Dogecoin (DOGE)</option>
+      <option value="solana">Solana (SOL)</option>
+      <option value="ripple">Ripple (XRP)</option>
+      <option value="cardano">Cardano (ADA)</option>
+      <option value="binancecoin">Binance (BNB)</option>
+      <option value="shiba-inu">Shiba Inu (SHIB)</option>
+    </select>
+
+    <select id="to">
+      <option value="inr">INR</option>
+      <option value="usd">USD</option>
+      <option value="bitcoin">Bitcoin (BTC)</option>
+      <option value="ethereum">Ethereum (ETH)</option>
+      <option value="tron">TRON (TRX)</option>
+      <option value="toncoin">Toncoin (TON)</option>
+      <option value="dogecoin">Dogecoin (DOGE)</option>
+    </select>
+
+    <button onclick="convert()">Convert</button>
+    <div class="result" id="result">Result will appear here</div>
+  </div>
+
+  <canvas id="chart"></canvas>
+
+  <div class="footer">⚡ Powered by CoinGecko API</div>
+
+<script>
+let chart;
+
+async function convert() {
+  const amount = parseFloat(document.getElementById("amount").value);
+  const from = document.getElementById("from").value;
+  const to = document.getElementById("to").value;
+  const resultEl = document.getElementById("result");
+
+  if (!amount) {
+    resultEl.innerHTML = "⚠️ Please enter an amount!";
+    return;
+  }
+
+  try {
+    // Get both prices in USD for conversion
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${from},${to}&vs_currencies=usd,inr`);
+    const data = await res.json();
+
+    if (!data[from]) {
+      resultEl.innerHTML = "❌ Coin not supported!";
+      return;
+    }
+
+    let rate;
+    if (to === "inr" || to === "usd") {
+      rate = data[from][to];
+    } else {
+      // crypto-to-crypto conversion via USD
+      rate = data[from].usd / data[to].usd;
+    }
+
+    const result = amount * rate;
+    resultEl.innerHTML = `${amount} ${from.toUpperCase()} = ${result.toFixed(6)} ${to.toUpperCase()}`;
+
+    // Show market chart for FROM coin (against USD)
+    showChart(from);
+  } catch (error) {
+    resultEl.innerHTML = "⚠️ Error fetching data!";
+  }
+}
+
+async function showChart(coinId) {
+  try {
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7&interval=daily`
+    );
+    const data = await res.json();
+
+    const prices = data.prices.map(p => p[1]);
+    const labels = data.prices.map(p => new Date(p[0]).toLocaleDateString());
+
+    const ctx = document.getElementById("chart").getContext("2d");
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: `${coinId.toUpperCase()} (Last 7 Days)`,
+          data: prices,
+          borderColor: "#00ffcc",
+          backgroundColor: "rgba(0,255,204,0.1)",
+          tension: 0.4,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            ticks: { color: "#ccc" }
+          },
+          y: {
+            ticks: { color: "#ccc" }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: "#fff" }
+          }
+        }
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+</script>
+</body>
+</html>
